@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDNS NEXUS</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; connect-src 'self' https:;">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: #000;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+            color: #00ff88;
+        }
+        
+        /* Animated grid background */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background-image: 
+                linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        /* Particle system */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.6;
+        }
+        
+        /* Scanlines effect */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            background: linear-gradient(
+                transparent 50%,
+                rgba(0, 255, 136, 0.03) 50%
+            );
+            background-size: 100% 4px;
+            animation: scanlines 0.1s linear infinite;
+        }
+        
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 5;
+        }
+        
+        /* Terminal-style header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .header h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: #00ff88;
+            text-shadow: 
+                0 0 10px #00ff88,
+                0 0 20px #00ff88,
+                0 0 40px #00ff88;
+            margin-bottom: 10px;
+            letter-spacing: 4px;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            from { text-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88, 0 0 40px #00ff88; }
+            to { text-shadow: 0 0 20px #00ff88, 0 0 30px #00ff88, 0 0 60px #00ff88; }
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            color: #00ccaa;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: typewriter 4s steps(40) 1s both;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid #00ff88;
+        }
+        
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        
+        /* HUD-style dashboard */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .hud-panel {
+            background: linear-gradient(135deg, rgba(0, 20, 15, 0.95), rgba(0, 40, 30, 0.95));
+            border: 2px solid #00ff88;
+            border-radius: 15px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .hud-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .hud-panel:hover::before {
+            left: 100%;
+        }
+        
+        .hud-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 10px 30px rgba(0, 255, 136, 0.3),
+                inset 0 0 20px rgba(0, 255, 136, 0.1);
+            border-color: #00ffaa;
+        }
+        
+        .panel-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #00ff88;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .panel-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            background: #00ff88;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            animation: iconPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes iconPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Status indicators with advanced styling */
+        .status-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 10px;
+            position: relative;
+        }
+        
+        .status-indicator::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            animation: statusRing 2s ease-in-out infinite;
+        }
+        
+        @keyframes statusRing {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+        }
+        
+        .status-online {
+            background: radial-gradient(circle, #00ff88, #00cc66);
+            color: #00ff88;
+            box-shadow: 0 0 15px #00ff88;
+        }
+        
+        .status-offline {
+            background: radial-gradient(circle, #ff4444, #cc2222);
+            color: #ff4444;
+            box-shadow: 0 0 15px #ff4444;
+        }
+        
+        .status-updating {
+            background: radial-gradient(circle, #ffaa00, #cc8800);
+            color: #ffaa00;
+            box-shadow: 0 0 15px #ffaa00;
+            animation: updating 1s ease-in-out infinite;
+        }
+        
+        @keyframes updating {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* Holographic IP display */
+        .ip-display {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00ffcc;
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(45deg, rgba(0, 255, 204, 0.1), rgba(0, 255, 136, 0.1));
+            border: 1px solid #00ffcc;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-shadow: 0 0 10px #00ffcc;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ip-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 204, 0.3), transparent);
+            animation: hologramScan 3s ease-in-out infinite;
+        }
+        
+        @keyframes hologramScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        /* Data fields with cyberpunk styling */
+        .data-field {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+            font-size: 0.9rem;
+        }
+        
+        .data-field:last-child {
+            border-bottom: none;
+        }
+        
+        .data-label {
+            color: #00cc88;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .data-value {
+            color: #00ffaa;
+            font-family: 'Orbitron', monospace;
+            text-shadow: 0 0 5px #00ffaa;
+        }
+        
+        /* Futuristic button */
+        .cyber-btn {
+            background: linear-gradient(45deg, #001a0d, #003d1a);
+            color: #00ff88;
+            border: 2px solid #00ff88;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-top: 15px;
+            width: 100%;
+        }
+        
+        .cyber-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .cyber-btn:hover::before {
+            left: 100%;
+        }
+        
+        .cyber-btn:hover {
+            background: linear-gradient(45deg, #003d1a, #006633);
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .cyber-btn:disabled {
+            background: #333;
+            color: #666;
+            border-color: #666;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        /* Terminal-style history table */
+        .terminal-table {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff88;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        .terminal-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .terminal-table th {
+            background: linear-gradient(135deg, #001a0d, #003d1a);
+            color: #00ff88;
+            padding: 15px;
+            text-align: left;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #00ff88;
+        }
+        
+        .terminal-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+            color: #00ccaa;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        
+        .terminal-table tr:hover {
+            background: rgba(0, 255, 136, 0.1);
+        }
+        
+        /* Loading animation */
+        .loading {
+            text-align: center;
+            color: #00ff88;
+            padding: 30px;
+            font-size: 1.1rem;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00ff88;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Info panel with holographic effect */
+        .info-panel {
+            background: linear-gradient(135deg, rgba(0, 40, 60, 0.9), rgba(0, 60, 80, 0.9));
+            border: 2px solid #00aaff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .info-panel::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(transparent, rgba(0, 170, 255, 0.1), transparent);
+            animation: rotate 4s linear infinite;
+        }
+        
+        @keyframes rotate {
+            to { transform: rotate(360deg); }
+        }
+        
+        .info-panel h4 {
+            color: #00aaff;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .info-panel p {
+            color: #aaeeff;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .info-panel code {
+            background: rgba(0, 0, 0, 0.6);
+            color: #00ff88;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-family: 'Share Tech Mono', monospace;
+            border: 1px solid #00ff88;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+    <canvas id="particles-canvas"></canvas>
+    <div class="scanlines"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>DDNS NEXUS</h1>
+            <div class="subtitle">NEURAL NETWORK DNS MONITORING SYSTEM</div>
+        </div>
+        
+        <div class="dashboard">
+            <div class="hud-panel">
+                <div class="panel-header">
+                    <div class="panel-icon"></div>
+                    System Status
+                </div>
+                <div id="current-ip" class="ip-display">INITIALIZING...</div>
+                <div class="data-field">
+                    <span class="data-label">Status:</span>
+                    <span class="data-value">
+                        <span id="status-indicator" class="status-indicator status-offline"></span>
+                        <span id="status-text">OFFLINE</span>
+                    </span>
+                </div>
+                <div class="data-field">
+                    <span class="data-label">Last Sync:</span>
+                    <span id="last-update" class="data-value">NEVER</span>
+                </div>
+                <button id="force-update" class="cyber-btn">FORCE SYNC</button>
+            </div>
+            
+            <div class="hud-panel">
+                <div class="panel-header">
+                    <div class="panel-icon"></div>
+                    Domain Matrix
+                </div>
+                <div class="data-field">
+                    <span class="data-label">Target:</span>
+                    <span id="record-name" class="data-value">-</span>
+                </div>
+                <div class="data-field">
+                    <span class="data-label">Zone ID:</span>
+                    <span id="zone-id" class="data-value">-</span>
+                </div>
+                <div class="data-field">
+                    <span class="data-label">TTL:</span>
+                    <span id="ttl" class="data-value">-</span>
+                </div>
+                <div class="data-field">
+                    <span class="data-label">Proxy:</span>
+                    <span id="proxy-status" class="data-value">-</span>
+                </div>
+            </div>
+            
+            <div class="hud-panel">
+                <div class="panel-header">
+                    <div class="panel-icon"></div>
+                    Neural Analytics
+                </div>
+                <div class="data-field">
+                    <span class="data-label">Total Syncs:</span>
+                    <span id="total-updates" class="data-value">0</span>
+                </div>
+                <div class="data-field">
+                    <span class="data-label">Last Change:</span>
+                    <span id="last-change" class="data-value">NEVER</span>
+                </div>
+                <div class="data-field">
+                    <span class="data-label">Uptime:</span>
+                    <span id="uptime" class="data-value">-</span>
+                </div>
+                <div class="data-field">
+                    <span class="data-label">Scan Rate:</span>
+                    <span id="refresh-interval" class="data-value">-</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="hud-panel">
+            <div class="panel-header">
+                <div class="panel-icon"></div>
+                Neural Network Activity Log
+            </div>
+            <div id="history-loading" class="loading">ACCESSING NEURAL ARCHIVES</div>
+            <div id="history-table" class="terminal-table" style="display: none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>TIMESTAMP</th>
+                            <th>PREVIOUS IP</th>
+                            <th>NEW IP</th>
+                            <th>STATUS</th>
+                            <th>NOTES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <h4>Neural Configuration Matrix</h4>
+            <p>All neural pathways are configured through encrypted environment variables in your <code>.env</code> file. 
+            Restart the neural core after making changes to apply new configurations.</p>
+        </div>
+    </div>
+
+    <script>
+        // Particle system
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = 100;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2 + 1;
+                this.opacity = Math.random() * 0.5 + 0.2;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = '#00ff88';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#00ff88';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            // Draw connections
+            particles.forEach((particle, i) => {
+                particles.slice(i + 1).forEach(otherParticle => {
+                    const dx = particle.x - otherParticle.x;
+                    const dy = particle.y - otherParticle.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 100) {
+                        ctx.save();
+                        ctx.globalAlpha = (100 - distance) / 100 * 0.2;
+                        ctx.strokeStyle = '#00ff88';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particle.x, particle.y);
+                        ctx.lineTo(otherParticle.x, otherParticle.y);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                });
+            });
+
+            requestAnimationFrame(animateParticles);
+        }
+
+        animateParticles();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        let currentData = {};
+        
+        // Load initial data
+        async function loadData() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                currentData = data;
+                updateUI(data);
+            } catch (error) {
+                console.error('Failed to load data:', error);
+                document.getElementById('current-ip').textContent = 'ERROR: NEURAL LINK FAILED';
+            }
+        }
+        
+        // Update UI with current data
+        function updateUI(data) {
+            const statusIndicator = document.getElementById('status-indicator');
+            const statusText = document.getElementById('status-text');
+            const currentIp = document.getElementById('current-ip');
+            const lastUpdate = document.getElementById('last-update');
+            
+            if (data.current_ip) {
+                currentIp.textContent = data.current_ip;
+                statusIndicator.className = 'status-indicator status-online';
+                statusText.textContent = 'ONLINE';
+            } else {
+                currentIp.textContent = 'UNKNOWN';
+                statusIndicator.className = 'status-indicator status-offline';
+                statusText.textContent = 'OFFLINE';
+            }
+            
+            if (data.last_update) {
+                lastUpdate.textContent = new Date(data.last_update).toLocaleString().toUpperCase();
+            }
+            
+            // Update domain info
+            document.getElementById('record-name').textContent = data.record_name || 'UNDEFINED';
+            document.getElementById('zone-id').textContent = data.zone_id ? data.zone_id.substring(0, 8) + '...' : 'UNDEFINED';
+            document.getElementById('ttl').textContent = data.ttl ? data.ttl + 'S' : 'UNDEFINED';
+            document.getElementById('proxy-status').textContent = data.proxy ? 'ENABLED' : 'DISABLED';
+            
+            // Update stats
+            document.getElementById('total-updates').textContent = data.total_updates || 0;
+            document.getElementById('last-change').textContent = data.last_change ? 
+                new Date(data.last_change).toLocaleString().toUpperCase() : 'NEVER';
+            document.getElementById('uptime').textContent = data.uptime || 'UNDEFINED';
+            document.getElementById('refresh-interval').textContent = data.update_interval ? `${data.update_interval} MIN` : 'UNDEFINED';
+        }
+        
+        // Load history
+        async function loadHistory() {
+            try {
+                const response = await fetch('/api/history');
+                const history = await response.json();
+                
+                const historyBody = document.getElementById('history-body');
+                const historyTable = document.getElementById('history-table');
+                const historyLoading = document.getElementById('history-loading');
+                
+                historyBody.innerHTML = '';
+                
+                if (history.length === 0) {
+                    historyBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #666;">NO NEURAL ACTIVITY DETECTED</td></tr>';
+                } else {
+                    history.forEach(entry => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${new Date(entry.timestamp).toLocaleString().toUpperCase()}</td>
+                            <td>${entry.old_ip || 'NULL'}</td>
+                            <td>${entry.new_ip}</td>
+                            <td><span style="color: ${entry.success ? '#44ff44' : '#ff4444'}">${entry.success ? 'SUCCESS' : 'FAILED'}</span></td>
+                            <td>${entry.notes ? entry.notes.toUpperCase() : 'NULL'}</td>
+                        `;
+                        historyBody.appendChild(row);
+                    });
+                }
+                
+                historyLoading.style.display = 'none';
+                historyTable.style.display = 'block';
+            } catch (error) {
+                console.error('Failed to load history:', error);
+                document.getElementById('history-loading').textContent = 'ERROR: NEURAL ARCHIVE ACCESS DENIED';
+            }
+        }
+        
+        // Force update
+        async function forceUpdate() {
+            const button = document.getElementById('force-update');
+            const statusIndicator = document.getElementById('status-indicator');
+            const statusText = document.getElementById('status-text');
+            
+            button.disabled = true;
+            button.textContent = 'SYNCING...';
+            statusIndicator.className = 'status-indicator status-updating';
+            statusText.textContent = 'SYNCING';
+            
+            try {
+                const response = await fetch('/api/update', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    loadData();
+                    loadHistory();
+                } else {
+                    alert('SYNC FAILED: ' + result.error);
+                }
+            } catch (error) {
+                alert('SYNC FAILED: ' + error.message);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'FORCE SYNC';
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('force-update').addEventListener('click', forceUpdate);
+        
+        // Initialize
+        loadData();
+        loadHistory();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            loadData();
+        }, 30000);
+        
+        // Refresh history every 5 minutes
+        setInterval(() => {
+            loadHistory();
+        }, 300000);
+    </script>
+</body>
+</html>

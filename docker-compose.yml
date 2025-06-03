@@ -1,0 +1,23 @@
+
+services:
+  ddns-tracker:
+    build: .
+    container_name: ddns-tracker
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - ddns-network
+
+networks:
+  ddns-network:
+    driver: bridge
+
+volumes:
+  ddns-data:
+    driver: local
