@@ -6,7 +6,7 @@ A simple web-based Dynamic DNS tracker that monitors IP changes and updates Clou
 
 - 🌐 **Real-time IP Monitoring** - Automatically detects public IP changes
 - 📊 **Historical Tracking** - History of DDNS IP updates
-- 🎛️ **Web Dashboard** - Modern, responsive interface with 3 themes, normal, CyberPunk & Matrix
+- 🎛️ **Web Dashboard** - Modern, responsive interface with 3 themes, normal, CyberPunk & Matrix ( Build the image yourself to change these )
 - 🐳 **Docker Ready** - Easy deployment with Docker Compose
 - ⚙️ **Configurable** - Flexible update intervals and settings
 
@@ -30,7 +30,7 @@ ddns-tracker/
 1. **Clone and Setup**
 
    ```
-   git clone <repository-url>
+   git clone https://github.com/estranged-networks/ddns_tracker
    cd ddns-tracker
    cp .env.example .env
    ```
@@ -49,7 +49,7 @@ ddns-tracker/
     UPDATE_INTERVAL=5
                        
     ```
-3. **Build it**
+3. **Run it**
      ```
      docker compose up -d
      ```
