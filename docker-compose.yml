@@ -1,7 +1,7 @@
 
 services:
   ddns-tracker:
-    image: davuri/ddns_tracker:latest
+    build: .
     container_name: ddns-tracker
     restart: unless-stopped
     ports:
