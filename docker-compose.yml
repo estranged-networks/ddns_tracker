@@ -1,7 +1,7 @@
 
 services:
   ddns-tracker:
-    build: .
+    image: davuri/ddns_tracker:latest
     container_name: ddns-tracker
     restart: unless-stopped
     ports:
@@ -17,7 +17,3 @@ services:
 networks:
   ddns-network:
     driver: bridge
-
-volumes:
-  ddns-data:
-    driver: local
