@@ -49,8 +49,9 @@ ddns-tracker/
     UPDATE_INTERVAL=5
                        
     ```
-3. **Run it**
+3. **Build it**
      ```
-     docker compose up -d
+     docker compose up --build # Remember clean up if youre builing/re-building  "docker compose down --rmi all --volumes --remove-orphans" 
+
      ```
    
