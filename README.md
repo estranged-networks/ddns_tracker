@@ -53,7 +53,7 @@ ddns-tracker/
      ```
      docker compose up --build
      ```
-     # Remember clean up if youre builing/re-building
+     # Remember clean up if youre building/re-building
 
      ```
      docker compose down --rmi all --volumes --remove-orphans
