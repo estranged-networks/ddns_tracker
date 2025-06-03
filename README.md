@@ -12,6 +12,21 @@ A simple web-based Dynamic DNS tracker that monitors IP changes and updates Clou
 
 ## Quick Start
 
+**File Structure**
+```
+ddns-tracker/
+├── server.js             # Main application server
+├── public/
+│   └── index.html        # Web dashboard option 1
+│   └── index.cyberpunk   # Web dashboard option 2
+│   └── index.matrix      # Web dashboard option 3
+├── data/                 # SQLite database storage
+├── Dockerfile            # Docker configuration
+├── docker-compose.yml    # Docker Compose setup
+├── package.json          # Node.js dependencies
+└── README.md             # This file
+```
+
 1. **Clone and Setup**
 
    ```
