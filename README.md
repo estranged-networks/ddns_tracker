@@ -10,9 +10,7 @@ A simple web-based Dynamic DNS tracker that monitors IP changes and updates Clou
 - 🐳 **Docker Ready** - Easy deployment with Docker Compose
 - ⚙️ **Configurable** - Flexible update intervals and settings
 
-## Quick Start
-
-**File Structure**
+## File Structure
 ```
 ddns-tracker/
 ├── server.js             # Main application server
@@ -26,6 +24,8 @@ ddns-tracker/
 ├── package.json          # Node.js dependencies
 └── README.md             # This file
 ```
+## Quick Start
+
 
 1. **Clone and Setup**
 
