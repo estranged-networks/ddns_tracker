@@ -168,9 +168,9 @@ async function performDDNSUpdate() {
     if (currentIP === oldIP) {
       console.log(`DDNS Updater: IP (${currentIP}) for ${CONFIG.record_name} has not changed.`)
 
-      // Update last check time
-      db.run("UPDATE ddns_status SET last_update = CURRENT_TIMESTAMP WHERE id = 1")
-      [currentIP])
+      // Update last check time AND current IP (this was missing!)
+      db.run("UPDATE ddns_status SET current_ip = ?, last_update = CURRENT_TIMESTAMP WHERE id = 1", [currentIP])
+
       return { success: true, changed: false, ip: currentIP }
     }
 
