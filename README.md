@@ -20,7 +20,7 @@ A simple web-based Dynamic DNS tracker that monitors IP changes and updates Clou
    cp .env.example .env
    ```
    
-3. **Add your own details to the .env**
+2. **Add your own details to the .env**
     ```
     CLOUDFLARE_EMAIL=your-email@example.com      # The email used to login 'https://dash.cloudflare.com'
     CLOUDFLARE_AUTH_METHOD=token                 # Set to "global" for Global API Key or "token" for Scoped API Token
@@ -34,5 +34,8 @@ A simple web-based Dynamic DNS tracker that monitors IP changes and updates Clou
     UPDATE_INTERVAL=5
                        
     ```
-
+3. **Build it**
+     ```
+     docker compose up --build
+     ```
    
