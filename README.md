@@ -51,6 +51,6 @@ ddns-tracker/
     ```
 3. **Build it**
      ```
-     docker compose up --build
+     docker compose up -d
      ```
    
