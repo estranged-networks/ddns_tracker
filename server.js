@@ -170,7 +170,7 @@ async function performDDNSUpdate() {
 
       // Update last check time
       db.run("UPDATE ddns_status SET last_update = CURRENT_TIMESTAMP WHERE id = 1")
-
+      [currentIP])
       return { success: true, changed: false, ip: currentIP }
     }
 
