@@ -31,7 +31,6 @@ A modern web-based Dynamic DNS tracker that monitors IP changes and updates Clou
     CLOUDFLARE_RECORD_NAME=your-record-name      # Which record you want to be synced
     CLOUDFLARE_TTL=3600                          # Set the DNS TTL (seconds)
     CLOUDFLARE_PROXY=false                       # Set the proxy to true or false                            
-    SITE_NAME=My DDNS Tracker                    # Title of site "Example Site"
     ```
 
    
